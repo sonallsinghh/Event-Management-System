@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Event</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Font Awesome for Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            font-family: 'Arial', sans-serif;
+            color: #fff;
+            animation: fadeIn 1s ease-in-out;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            animation: slideInUp 1s ease-out;
+        }
+        h2 {
+            color: #ff6b6b;
+            animation: slideInDown 1s ease-out;
+        }
+        .form-group {
+            position: relative;
+            animation: fadeInUp 1s ease-out;
+        }
+        .form-group label {
+            color: #333;
+        }
+        .form-control {
+            border: 2px solid #ff6b6b;
+            transition: border-color 0.3s ease;
+        }
+        .form-control:focus {
+            border-color: #f093fb;
+            box-shadow: 0 0 5px rgba(240, 147, 251, 0.5);
+        }
+        .btn-primary {
+            background-color: #ff6b6b;
+            border: none;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #f093fb;
+            transform: scale(1.05);
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center">Add Event</h2>
+        <br>
+        <form method="post" action="{% url 'create_event' %}" onsubmit="return validateForm()">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="eventName">Event Name:</label>
+                <input type="text" class="form-control" id="eventName" name="name" placeholder="Enter event name" required>
+            </div>
+            <div class="form-group">
+                <label for="eventCategory">Category:</label>
+                <select class="form-control" id="eventCategory" name="category" required>
+                    <option value="">Select category</option>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="startDate">Start Date:</label>
+                <input type="datetime-local" class="form-control" id="startDate" name="start_date" required>
+            </div>
+            <div class="form-group">
+                <label for="endDate">End Date:</label>
+                <input type="datetime-local" class="form-control" id="endDate" name="end_date" required>
+            </div>
+            <div class="form-group">
+                <label for="priority">Priority:</label>
+                <input type="number" class="form-control" id="priority" name="priority" min="1" value="1" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="location">Location:</label>
+                <input type="text" class="form-control" id="location" name="location" placeholder="Enter event location">
+            </div>
+            <div class="form-group">
+                <label for="organizer">Organizer:</label>
+                <input type="text" class="form-control" id="organizer" name="organizer" placeholder="Enter event organizer">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Submit</button>
+        </form>
+    </div>
+
+    <!-- Bootstrap JS (Optional - for certain Bootstrap features like dropdowns, modals, etc.) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function validateForm() {
+            var startDate = document.getElementById("startDate").value;
+            var endDate = document.getElementById("endDate").value;
+
+            if (new Date(startDate) >= new Date(endDate)) {
+                alert("End date must be after the start date.");
+                return false;
+            }
+            return true;
+        }
+    </script>
+</body>
+</html>

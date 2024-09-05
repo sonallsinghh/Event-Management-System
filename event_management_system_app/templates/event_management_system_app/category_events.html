@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ category.name }} Events</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f8f9fa 30%, #e9ecef 100%);
+            font-family: 'Arial', sans-serif;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #007bff;
+            animation: fadeInDown 1s ease-out;
+        }
+        .btn-primary, .btn-secondary, .btn-danger, .btn-info {
+            transition: background-color 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        .btn-info:hover {
+            background-color: #138496;
+        }
+        .table th, .table td {
+            animation: fadeInUp 1s ease-out;
+        }
+        .modal-content {
+            animation: zoomIn 0.5s ease;
+        }
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes zoomIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <h2 class="text-center">{{ category.name }} Events</h2>
+    <br>
+    <div class="mb-3 text-center">
+        <a href="{% url 'create_event' %}" class="btn btn-primary">Add New Event</a>
+        <a href="{% url 'category_list' %}" class="btn btn-secondary ml-2">Back to Categories</a>
+    </div>
+    <table id="eventTable" class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Name</th>
+                <th>Start Date</th>
+                <th>Time Left</th>
+                <th>Priority <button class="btn btn-link" onclick="sortByPriority()">▲</button></th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for event in events %}
+            <tr>
+                <td>{{ event.name }}</td>
+                <td>{{ event.start_date }}</td>
+                <td>
+                    <div id="countdown_{{ event.id }}" class="countdown-timer"></div>
+                </td>
+                <td>{{ event.priority }}</td>
+                <td>
+                    <a href="{% url 'update_event' event.id %}" class="btn btn-primary btn-sm">Update</a>
+                    <form method="post" action="{% url 'delete_event' event.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                    <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#eventModal_{{ event.id }}">Details</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal for event details -->
+{% for event in events %}
+<div class="modal fade" id="eventModal_{{ event.id }}" tabindex="-1" role="dialog" aria-labelledby="eventModalLabel_{{ event.id }}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="eventModalLabel_{{ event.id }}">{{ event.name }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Name:</strong> {{ event.name }}</p>
+                <p><strong>Category:</strong> {{ event.category.name }}</p>
+                <p><strong>Start Date:</strong> {{ event.start_date }}</p>
+                <p><strong>End Date:</strong> {{ event.end_date }}</p>
+                <p><strong>Priority:</strong> {{ event.priority }}</p>
+                <p><strong>Description:</strong> {{ event.description }}</p>
+                <p><strong>Location:</strong> {{ event.location }}</p>
+                <p><strong>Organizer:</strong> {{ event.organizer }}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- JavaScript for sorting and countdown timers -->
+<script>
+    function sortByPriority() {
+        var table, rows, switching, i, x, y, shouldSwitch;
+        table = document.getElementById("eventTable");
+        switching = true;
+        while (switching) {
+            switching = false;
+            rows = table.getElementsByTagName("tr");
+            for (i = 1; i < (rows.length - 1); i++) {
+                shouldSwitch = false;
+                x = rows[i].getElementsByTagName("td")[3];
+                y = rows[i + 1].getElementsByTagName("td")[3];
+                if (parseInt(x.innerHTML) < parseInt(y.innerHTML)) {
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+            if (shouldSwitch) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+            }
+        }
+    }
+
+    // Function to update countdown timers
+    function updateCountdownTimers() {
+        $.ajax({
+            url: '{% url "get_events" %}',
+            method: 'GET',
+            success: function(data) {
+                $.each(data, function(index, event) {
+                    var startDate = new Date(event.start_date);
+                    var now = new Date();
+                    var timeDiff = startDate - now;
+
+                    if (timeDiff > 0) {
+                        var days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+                        var hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        var minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+                        var seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+                        document.getElementById('countdown_' + event.id).innerText = days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+                    } else {
+                        document.getElementById('countdown_' + event.id).innerText = "Event has started";
+                    }
+                });
+            }
+        });
+    }
+
+    setInterval(updateCountdownTimers, 1000);
+</script>
+
+<!-- Bootstrap and jQuery scripts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

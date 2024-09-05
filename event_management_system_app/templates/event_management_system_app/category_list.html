@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Category List</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            font-family: 'Arial', sans-serif;
+            color: #fff;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #ff6b6b;
+            animation: fadeInDown 1s ease-out;
+        }
+        .btn-primary, .btn-info, .btn-danger {
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #007bff;
+            transform: scale(1.05);
+        }
+        .btn-info:hover {
+            background-color: #17a2b8;
+            transform: scale(1.05);
+        }
+        .btn-danger:hover {
+            background-color: #dc3545;
+            transform: scale(1.05);
+        }
+        .table th, .table td {
+            animation: fadeInUp 1s ease-out;
+            color: #333;
+        }
+        .table-hover tbody tr:hover {
+            background-color: rgba(0, 123, 255, 0.1);
+        }
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Message display section -->
+    <div class="container mt-5">
+        <div class="text-center">
+            <h2>Categories</h2>
+        </div>
+        <br>
+        <div class="text-center mb-3">
+            <a href="{% url 'create_category' %}" class="btn btn-primary">Create Category</a> <!-- Button to create category -->
+            <a href="{% url 'event_chart' %}" class="btn btn-info ml-2">View Event Chart</a> <!-- Button to view event chart -->
+        </div>
+        <table class="table table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Actions</th> <!-- Column for actions -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in categories %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'category_events' category.id %}" style="color: #007bff;">{{ category.name }}</a>
+                        </td> <!-- Link to category_events page -->
+                        <td>
+                            <form method="post" action="{% url 'delete_category' category.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button> <!-- Button to delete category -->
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        var messages = JSON.parse('{{ messages|safe }}');
+        if (messages) {
+            for (var i = 0; i < messages.length; i++) {
+                console.log(messages[i]);
+            }
+        }
+    </script>
+
+    <!-- Bootstrap JS (Optional - for certain Bootstrap features like modals) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
